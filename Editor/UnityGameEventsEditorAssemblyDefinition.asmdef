@@ -1,0 +1,20 @@
+{
+    "name": "UnityGameEventsEditorAssemblyDefinition",
+    "rootNamespace": "",
+    "references": [
+        "GUID:7ea637f12ee486146bd3500de600792c",
+        "GUID:1d3a824f84c56fc4a80a59db8475491f",
+        "GUID:c07277a83abd32d4ca23acd43cef53b0"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
