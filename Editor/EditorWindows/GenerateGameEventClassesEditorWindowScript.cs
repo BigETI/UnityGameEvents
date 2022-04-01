@@ -25,6 +25,11 @@ namespace UnityGameEventsEditor.EditorWindows
         /// Allowed enumerators
         /// </summary>
         private static IReadOnlyList<Type> allowedEnumerators;
+        
+        /// <summary>
+        /// Allowed interfaces
+        /// </summary>
+        private static IReadOnlyList<Type> allowedInterfaces;
 
         /// <summary>
         /// Allowed value types
@@ -401,10 +406,11 @@ namespace UnityGameEventsEditor.EditorWindows
         {
             ScrollPosition = EditorGUILayout.BeginScrollView(ScrollPosition);
             EditorGUILayout.LabelField("Directory path", directoryPath);
-            if ((allowedClasses == null) || (allowedEnumerators == null) || (allowedValueTypes == null))
+            if ((allowedClasses == null) || (allowedEnumerators == null) || (allowedInterfaces == null) || (allowedValueTypes == null))
             {
                 List<Type> allowed_classes = new List<Type>();
                 List<Type> allowed_enumerators = new List<Type>();
+                List<Type> allowed_interfaces = new List<Type>();
                 List<Type> allowed_value_types = new List<Type>();
                 foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
@@ -413,6 +419,10 @@ namespace UnityGameEventsEditor.EditorWindows
                         if (type.IsEnum)
                         {
                             allowed_enumerators.Add(type);
+                        }
+                        else if (type.IsInterface)
+                        {
+                            allowed_interfaces.Add(type);
                         }
                         else if (type.IsClass || type.IsValueType)
                         {
@@ -435,11 +445,13 @@ namespace UnityGameEventsEditor.EditorWindows
                 }
                 allowed_classes.Sort((Type left, Type right) => left.FullName.CompareTo(right.FullName));
                 allowed_enumerators.Sort((Type left, Type right) => left.FullName.CompareTo(right.FullName));
+                allowed_interfaces.Sort((Type left, Type right) => left.FullName.CompareTo(right.FullName));
                 allowed_value_types.Sort((Type left, Type right) => left.FullName.CompareTo(right.FullName));
                 allowedClasses = allowed_classes;
                 allowedEnumerators = allowed_enumerators;
+                allowedInterfaces = allowed_interfaces;
                 allowedValueTypes = allowed_value_types;
-                allowedTypeNames = new string[allowed_classes.Count + allowed_enumerators.Count + allowed_value_types.Count];
+                allowedTypeNames = new string[allowed_classes.Count + allowed_enumerators.Count + allowed_interfaces.Count + allowed_value_types.Count];
                 for (int index = 0; index < allowedClasses.Count; index++)
                 {
                     Type allowed_class = allowed_classes[index];
@@ -450,10 +462,15 @@ namespace UnityGameEventsEditor.EditorWindows
                     Type allowed_enumerator = allowed_enumerators[index];
                     allowedTypeNames[allowedClasses.Count + index] = $"Enumerators/{ allowed_enumerator.FullName.Replace('.', '/') }";
                 }
+                for (int index = 0; index < allowedInterfaces.Count; index++)
+                {
+                    Type allowed_interface = allowed_interfaces[index];
+                    allowedTypeNames[allowedClasses.Count + allowedEnumerators.Count + index] = $"Interfaces/{ allowed_interface.FullName.Replace('.', '/') }";
+                }
                 for (int index = 0; index < allowedValueTypes.Count; index++)
                 {
                     Type allowed_value_type = allowed_value_types[index];
-                    allowedTypeNames[allowedClasses.Count + allowedEnumerators.Count + index] = $"Value types/{ allowed_value_type.FullName.Replace('.', '/') }";
+                    allowedTypeNames[allowedClasses.Count + allowedEnumerators.Count + allowedInterfaces.Count + index] = $"Value types/{ allowed_value_type.FullName.Replace('.', '/') }";
                 }
             }
             selectedAllowedTypeIndex = EditorGUILayout.Popup("Type", selectedAllowedTypeIndex, allowedTypeNames);
@@ -464,7 +481,18 @@ namespace UnityGameEventsEditor.EditorWindows
             }
             else
             {
-                Type type = (selectedAllowedTypeIndex < allowedClasses.Count) ? allowedClasses[selectedAllowedTypeIndex] : (((selectedAllowedTypeIndex - allowedClasses.Count) < allowedEnumerators.Count) ? allowedEnumerators[selectedAllowedTypeIndex - allowedClasses.Count] : allowedValueTypes[selectedAllowedTypeIndex - allowedClasses.Count - allowedEnumerators.Count]);
+                Type type =
+                    (selectedAllowedTypeIndex < allowedClasses.Count) ?
+                        allowedClasses[selectedAllowedTypeIndex] :
+                        (
+                            ((selectedAllowedTypeIndex - allowedClasses.Count) < allowedEnumerators.Count) ?
+                                allowedEnumerators[selectedAllowedTypeIndex - allowedClasses.Count] :
+                                (
+                                    ((selectedAllowedTypeIndex - allowedClasses.Count - allowedEnumerators.Count) < allowedInterfaces.Count) ?
+                                        allowedInterfaces[selectedAllowedTypeIndex - allowedClasses.Count - allowedEnumerators.Count] :
+                                        allowedValueTypes[selectedAllowedTypeIndex - allowedClasses.Count - allowedEnumerators.Count - allowedInterfaces.Count]
+                                )
+                        );
                 if (lastSelectedAllowedTypeIndex != selectedAllowedTypeIndex)
                 {
                     lastSelectedAllowedTypeIndex = selectedAllowedTypeIndex;
