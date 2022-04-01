@@ -1,6 +1,6 @@
 {
     "name": "com.bigeti.gameevents",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "displayName": "Unity game events",
     "description": "This package contains modules to invoke and listen to game events.",
     "dependencies": {},
